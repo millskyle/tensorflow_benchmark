@@ -82,6 +82,7 @@ EPOCHS = 1000
 print "Generating random data..."
 train_data, train_labels = make_data(BATCH_SIZE, L, type_=np.float32)
 print "Beginning training..."
+throughput = 0.
 for epoch in range(EPOCHS):
     _, loss_val = sess.run([train_step, loss],
                     feed_dict={
@@ -92,7 +93,10 @@ for epoch in range(EPOCHS):
 
     n = (epoch+1)*BATCH_SIZE
     totaltime = time.time() - stime
-    print "Throughput: {0:10.4f}".format(n/totaltime)
+    if abs(n/totaltime - throughput) < 0.001:
+        break
+    throughput = n/totaltime
+    print "Throughput: {0:10.4f}".format(throughput)
 
 
 
