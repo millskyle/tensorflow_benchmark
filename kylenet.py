@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import progressbar
 import time
 
 
@@ -20,8 +19,8 @@ def reducing(_in):
        We use ReLU activation
     """
     return tf.contrib.layers.conv2d(_in, 64, kernel_size=3, stride=2, activation_fn=tf.nn.relu,
-                    weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
-                    biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16)
+       #             weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
+       #             biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16)
                     )
 
 def nonreducing(_in):
@@ -31,8 +30,8 @@ def nonreducing(_in):
        We use ReLU activation.
     """
     return tf.contrib.layers.conv2d(_in, 16, kernel_size=4, stride=1, activation_fn=tf.nn.relu,
-                    weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
-                    biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16)
+        #            weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
+        #            biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16)
                     )
 
 
@@ -49,20 +48,20 @@ def CNN(_in):
         net = nonreducing(nonreducing(reducing(net)))
     net = tf.reshape(net, (-1, 4*4*16))
     net = tf.contrib.layers.fully_connected(net, 1024, activation_fn=tf.nn.relu,
-                    weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
-                    biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16)
+         #           weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
+         #           biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16)
                     )
     net = tf.contrib.layers.fully_connected(net, 1, activation_fn=None,
-                     weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
-                     biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
+          #           weights_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
+          #           biases_initializer=tf.contrib.layers.xavier_initializer(dtype=tf.float16),
                  )
     return net
 
 
-
+print "Building graph..."
 #data comes in a [ batch * L * L * 1 ] tensor, and labels a [ batch * 1] tensor
-x = tf.placeholder(tf.float16, (None, L, L, 1), name='input_image')
-y = tf.placeholder(tf.float16, (None, 1))
+x = tf.placeholder(tf.float32, (None, L, L, 1), name='input_image')
+y = tf.placeholder(tf.float32, (None, 1))
 predicted = CNN(x)
 #define the loss function
 loss = tf.reduce_mean(tf.square(y-predicted))
@@ -71,16 +70,18 @@ optimizer = tf.train.AdamOptimizer(learning_rate=0.00001)
 train_step = optimizer.minimize(loss)
 init = tf.global_variables_initializer()
 
-
+print "Initializing variables..."
 
 sess = tf.InteractiveSession()
 sess.run(init)
 
-train_data, train_labels = make_data(10000, L, type_=np.float16)
+print "Generating random data..."
+train_data, train_labels = make_data(10000, L, type_=np.float32)
 
 stime = time.time()
-BATCH_SIZE = 600
+BATCH_SIZE = 10
 EPOCHS = 100
+print "Beginning training..."
 for epoch in range(EPOCHS):
 	for batch in xrange(train_data.shape[0] / BATCH_SIZE):
 		_, loss_val = sess.run([train_step, loss],
