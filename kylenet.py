@@ -4,8 +4,8 @@ import time
 
 
 def make_data(N, L, type_=np.float16):
-    X = np.random.rand(N,L,L,1).astype(type_)
-    Y = np.random.rand(N, 1).astype(type_)
+    X = np.random.rand(N,L,L,1)
+    Y = np.random.rand(N, 1)
     return X, Y
 
 
@@ -75,25 +75,24 @@ print "Initializing variables..."
 sess = tf.InteractiveSession()
 sess.run(init)
 
-print "Generating random data..."
-train_data, train_labels = make_data(10000, L, type_=np.float32)
 
 stime = time.time()
 BATCH_SIZE = 10
-EPOCHS = 100
+EPOCHS = 1000
+print "Generating random data..."
+train_data, train_labels = make_data(BATCH_SIZE, L, type_=np.float32)
 print "Beginning training..."
 for epoch in range(EPOCHS):
-	for batch in xrange(train_data.shape[0] / BATCH_SIZE):
-		_, loss_val = sess.run([train_step, loss],
+    _, loss_val = sess.run([train_step, loss],
                     feed_dict={
-                        x: train_data[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE],
-                        y: train_labels[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]
+                        x: train_data,
+                        y: train_labels
                     }
                 )
 
-        n = (epoch) * train_data.shape[0] + BATCH_SIZE * batch - BATCH_SIZE
-        totaltime = time.time() - stime
-        print "Throughput: {0:10.4f}".format(n/totaltime)
+    n = (epoch+1)*BATCH_SIZE
+    totaltime = time.time() - stime
+    print "Throughput: {0:10.4f}".format(n/totaltime)
 
 
 
